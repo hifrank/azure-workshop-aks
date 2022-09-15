@@ -9,9 +9,10 @@ you may refer [here](https://docs.microsoft.com/en-us/azure/aks/csi-storage-driv
 
 Here, we are going to have quick start guide for Azure Disk and Azure files with AKS.
 
-## Azure file
+## Azure Disk
 
 ### Storage Class
+
 Along with AKS, there are 2 storage classes using Azure Disk:
 1. managed-csi: Use standard SSD locally redundant storage(LRS) to create a managed disk.
 2. managed-csi-premium: Use Azure Premium LRS to create a managed disk.
@@ -51,6 +52,7 @@ $ kubectl apply -f ./file/storage_class_demo.yaml
 storageclass.storage.k8s.io/azuredisk-csi-demo created
 ```
 #### 2. Check the storage class exist
+
 ```
 $ kubectl get sc azuredisk-csi-demo -o yaml
 ```
@@ -76,6 +78,7 @@ volumeBindingMode: WaitForFirstConsumer
   
 ```
 ### Dynamically create a Azure Disk PC using storage class we just created and mount to a pod
+
 ```bash
 kubectl apply -f file/pod_nginx_demo.yaml
 ```
@@ -116,7 +119,7 @@ items:
 ```
 ```bash
 # then you can use azure portl to check managed disk tags, or use azure cli like below:
-$ az disk show --name pvc-86bdc20f-e078-4538-851d-50e1eaf882bc --resource-group mc_rg-prd-datalake-aks_aks-prd-datalake_eastasia --query tags
+$ az disk show --name <disk name> --resource-group <resource group name> --query tags
 {
   "costceneter": "demo",
   "env": "demo",
