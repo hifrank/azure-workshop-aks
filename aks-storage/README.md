@@ -39,8 +39,10 @@ volumeBindingMode: WaitForFirstConsumer
 ```
 In some case, you might want to create your own storage class with specific parameter which is not covered by default storage class, for ex, you want to assign tags to the provisioned managed disk, or change resource group of the disk. You may refer to [here](https://docs.microsoft.com/en-us/azure/aks/azure-disk-csi#storage-class-driver-dynamic-disks-parameters) for more information about parameter you can use.
 
-Right here, we create a Storage Class which will be assigned for some predefined tags.
-#### 1. create storage class
+Right here, we create a Storage Class which will be assigned for some predefined tags:
+
+#### 1. Create storage class
+
 ```bash
 $ kubectl apply -f ./file/storage_class_demo.yaml
 ```
@@ -48,7 +50,7 @@ $ kubectl apply -f ./file/storage_class_demo.yaml
  --output--
 storageclass.storage.k8s.io/azuredisk-csi-demo created
 ```
-#### 2. check the storage class exist
+#### 2. Check the storage class exist
 ```
 $ kubectl get sc azuredisk-csi-demo -o yaml
 ```
@@ -73,4 +75,58 @@ reclaimPolicy: Delete
 volumeBindingMode: WaitForFirstConsumer
   
 ```
-### 
+### Dynamically create a Azure Disk PC using storage class we just created and mount to a pod
+```bash
+kubectl apply -f file/pod_nginx_demo.yaml
+```
+```bash
+--output--
+persistentvolumeclaim/pvc-azuredisk-demo created
+pod/nginx-azuredisk created
+```
+Then we can check the result by:
+```bash
+# check the PV exist
+$ kubectl get pv
+NAME                                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                        STORAGECLASS         REASON   AGE
+pvc-86bdc20f-e078-4538-851d-50e1eaf882bc   5Gi        RWO            Delete           Bound    default/pvc-azuredisk-demo   azuredisk-csi-demo            55s
+
+# check the disk is mounted to the running pod
+$ kubectl exec -it nginx-azuredisk -- sh
+> tail -n 2 /mnt/azuredisk/outfile
+Thu Sep 15 15:23:50 UTC 2022
+Thu Sep 15 15:23:51 UTC 2022
+
+# check tag assigned to azure managed disk, first get the disk name & resource group
+$ kubectl get pv -o yaml
+```
+```yaml
+apiVersion: v1
+items:
+- apiVersion: v1
+  kind: PersistentVolume
+  metadata:
+  ...
+  spec:
+  ...
+    csi:
+      driver: disk.csi.azure.com
+      volumeAttributes:
+        volumeHandle: /subscriptions/<subscription id>/resourceGroups/<resource group name>/providers/Microsoft.Compute/disks/<disk name>
+```
+```bash
+# then you can use azure portl to check managed disk tags, or use azure cli like below:
+$ az disk show --name pvc-86bdc20f-e078-4538-851d-50e1eaf882bc --resource-group mc_rg-prd-datalake-aks_aks-prd-datalake_eastasia --query tags
+{
+  "costceneter": "demo",
+  "env": "demo",
+  "k8s-azure-created-by": "kubernetes-azure-dd",
+  "kubernetes.io-created-for-pv-name": "pvc-86bdc20f-e078-4538-851d-50e1eaf882bc",
+  "kubernetes.io-created-for-pvc-name": "pvc-azuredisk-demo",
+  "kubernetes.io-created-for-pvc-namespace": "default"
+}
+```
+Now you just created a managed disk with tags you specify and mounted to your pod.
+
+To learn more, make you check the [azure document](https://docs.microsoft.com/en-us/azure/aks/azure-disk-csi).
+
