@@ -234,4 +234,4 @@ PS: This will only remove azure file share in storage account, but the storage a
 
 Now we just create a stoage class, pvc and pv, mounted to a running nginx pod.
 
-Make sure you read this for more detal about [azure file](https://docs.microsoft.com/en-us/azure/aks/azure-files-csi).
+Make sure you read this for more detail about [azure file CSI](https://docs.microsoft.com/en-us/azure/aks/azure-files-csi).
