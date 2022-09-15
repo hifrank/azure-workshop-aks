@@ -19,8 +19,9 @@ Along with AKS, there are 2 storage classes using Azure Disk:
 
 to check these storage class detail, you can use kubectl get sc <storage class>, below are example output
 ```bash
-$ kubectl get sc managed-csi -o yaml
-
+kubectl get sc managed-csi -o yaml
+```
+```yaml
 allowVolumeExpansion: true
 apiVersion: storage.k8s.io/v1
 kind: StorageClass
@@ -45,7 +46,7 @@ Right here, we create a Storage Class which will be assigned for some predefined
 #### 1. Create storage class
 
 ```bash
-$ kubectl apply -f ./disk/storage_class_demo.yaml
+kubectl apply -f ./disk/storage_class_demo.yaml
 ```
 ```bash
  --output--
@@ -54,8 +55,8 @@ storageclass.storage.k8s.io/azuredisk-csi-demo created
 
 #### 2. Check the storage class exist
 
-```
-$ kubectl get sc azuredisk-csi-demo -o yaml
+```bash
+kubectl get sc azuredisk-csi-demo -o yaml
 ```
 ```yaml
  --output--
@@ -88,23 +89,34 @@ kubectl apply -f ./disk/pod_nginx_demo.yaml
 persistentvolumeclaim/pvc-azuredisk-demo created
 pod/nginx-azuredisk created
 ```
+
 Then we can check the result by:
+check the pv exist:
 ```bash
-# check the PV exist
 $ kubectl get pv
+```
+```bash
+--output--
 NAME                                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM                        STORAGECLASS         REASON   AGE
 pvc-86bdc20f-e078-4538-851d-50e1eaf882bc   5Gi        RWO            Delete           Bound    default/pvc-azuredisk-demo   azuredisk-csi-demo            55s
+```
 
-# check the disk is mounted to the running pod
-$ kubectl exec -it nginx-azuredisk -- sh
+check the disk is mounted to the running pod
+```bash
+kubectl exec -it nginx-azuredisk -- sh
+```
+```bash
+(in container)
 > tail -n 2 /mnt/azuredisk/outfile
 Thu Sep 15 15:23:50 UTC 2022
 Thu Sep 15 15:23:51 UTC 2022
-
-# check tag assigned to azure managed disk, first get the disk name & resource group
-$ kubectl get pv -o yaml
+```
+Check tags assigned to azure managed disk, first get the disk name & resource group
+```bash
+kubectl get pv -o yaml
 ```
 ```yaml
+--output--
 apiVersion: v1
 items:
 - apiVersion: v1
@@ -118,9 +130,12 @@ items:
       volumeAttributes:
         volumeHandle: /subscriptions/<subscription id>/resourceGroups/<resource group name>/providers/Microsoft.Compute/disks/<disk name>
 ```
+Then you can use azure portl to check managed disk tags, or use azure cli like below:
 ```bash
-# then you can use azure portl to check managed disk tags, or use azure cli like below:
-$ az disk show --name <disk name> --resource-group <resource group name> --query tags
+az disk show --name <disk name> --resource-group <resource group name> --query tags
+```
+```json
+--output--
 {
   "costceneter": "demo",
   "env": "demo",
@@ -152,19 +167,20 @@ Here, like Azure Disk, we are going to create custom Azure file storage class fo
 #### 1. Create storage class
 
 ```bash
-$ kubectl apply -f ./file/storage_class_file_demo.yaml 
-
+kubectl apply -f ./file/storage_class_file_demo.yaml
+```
+```bash
  --output--
 storageclass.storage.k8s.io/azurefile-csi-demo created
-
 ```
 Azure file need a storage account, in this demo, we don't specifiy stoage account for it, so it will create one for us. (If you need to specify stoage account, make sure it's existed one.)
 #### 2. Check the storage class exist
 ```bash
-# The minium stoage size of Azure File is 100G.
-$ kubectl get sc azurefile-csi-demo
-
+kubectl get sc azurefile-csi-demo
+```
+```bash
 --output--
+# The minium stoage size of Azure File is 100G.
 NAME                 PROVISIONER          RECLAIMPOLICY   VOLUMEBINDINGMODE   ALLOWVOLUMEEXPANSION   AGE
 azurefile-csi-demo   file.csi.azure.com   Delete          Immediate           true                   9m59s
 ```
@@ -172,17 +188,19 @@ azurefile-csi-demo   file.csi.azure.com   Delete          Immediate           tr
 ### Dynamically create a Azure File using storage class we just created and mount to a pod
 First we create a PVC and a nginx pod to mount the PV.
 ```bash
-$kubectl apply -f ./file/pod_nginx_file_demo.yaml
-
+kubectl apply -f ./file/pod_nginx_file_demo.yaml
+```
+```bash
 --output--
 persistentvolumeclaim/pvc-azurefile-demo created
 pod/nginx-azurefile created
 ```
 
 Then we can check the PVC status, it should looked like
+```bash
+kubectl get pvc
 ```
-$ kubectl get pvc
-
+```bash
 --output--
 NAME                 STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS         AGE
 pvc-azurefile-demo   Bound    pvc-c346351e-4f1f-4390-903b-a6fde185ca14   100Gi      RWO            azurefile-csi-demo   16m
@@ -190,7 +208,10 @@ pvc-azurefile-demo   Bound    pvc-c346351e-4f1f-4390-903b-a6fde185ca14   100Gi  
 
 We can check how it looked in the pod, you should able to get a disk mounted in path /mnt/azuredisk with size 100G.
 ```bash
-$ kubectl exec -it nginx-azurefile -- sh
+kubectl exec -it nginx-azurefile -- sh
+```
+```bash
+(in container)
 > tail -n 2 /mnt/azuredisk/outfile
 
 --output--
@@ -205,11 +226,11 @@ Thu Sep 15 16:12:10 UTC 2022
 
 To remove the resource
 ```bash
-kubectl delete -f ./file/pod_nginx_file_demo.yaml 
-# note this will only remove azure file share in storage account, but the storage account won't be delete, you may have to remove it manually.
+kubectl delete -f ./file/pod_nginx_file_demo.yaml
 kubectl delete -f ./file/storage_class_file_demo.yaml
-
 ```
+PS: This will only remove azure file share in storage account, but the storage account won't be delete, you may have to remove it manually.
+
 
 Now we just create a stoage class, pvc and pv, mounted to a running nginx pod.
 
