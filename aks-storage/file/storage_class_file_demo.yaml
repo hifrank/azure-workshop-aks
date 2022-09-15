@@ -16,5 +16,4 @@ mountOptions:
   - nosharesock
 parameters:
   skuName: Standard_LRS
-  tags: env=demo,costceneter=demo,demo=disk
-  storageAccount: aksfiledemo01
+  tags: env=demo,costceneter=demo,demo=file
