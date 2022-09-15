@@ -206,7 +206,9 @@ Thu Sep 15 16:12:10 UTC 2022
 To remove the resource
 ```bash
 kubectl delete -f file/pod_nginx_file_demo.yaml 
+# note this will only remove azure file share in storage account, but the storage account won't be delete, you may have to remove it manually.
 kubectl delete -f file/storage_class_file_demo.yaml
+
 ```
 
 Now we just create a stoage class, pvc and pv, mounted to a running nginx pod.
