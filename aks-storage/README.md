@@ -124,7 +124,7 @@ $ az disk show --name <disk name> --resource-group <resource group name> --query
   "costceneter": "demo",
   "env": "demo",
   "k8s-azure-created-by": "kubernetes-azure-dd",
-  "kubernetes.io-created-for-pv-name": "pvc-86bdc20f-e078-4538-851d-50e1eaf882bc",
+  "kubernetes.io-created-for-pv-name": "<your disk anme>",
   "kubernetes.io-created-for-pvc-name": "pvc-azuredisk-demo",
   "kubernetes.io-created-for-pvc-namespace": "default"
 }
