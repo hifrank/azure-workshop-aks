@@ -5,7 +5,7 @@ metadata:
 provisioner: disk.csi.azure.com
 parameters:
   skuname: StandardSSD_LRS
-  tags: env=demo,costceneter=demo
+  tags: env=demo,costceneter=demo,demo=disk
 allowVolumeExpansion: true
 reclaimPolicy: Delete
 volumeBindingMode: WaitForFirstConsumer
