@@ -81,7 +81,7 @@ volumeBindingMode: WaitForFirstConsumer
 ### Dynamically create a Azure Disk PC using storage class we just created and mount to a pod
 
 ```bash
-kubectl apply -f disk/pod_nginx_demo.yaml
+kubectl apply -f ./disk/pod_nginx_demo.yaml
 ```
 ```bash
 --output--
@@ -152,7 +152,7 @@ Here, like Azure Disk, we are going to create custom Azure file storage class fo
 #### 1. Create storage class
 
 ```bash
-$ kubectl apply -f file/storage_class_file_demo.yaml 
+$ kubectl apply -f ./file/storage_class_file_demo.yaml 
 
  --output--
 storageclass.storage.k8s.io/azurefile-csi-demo created
@@ -172,7 +172,7 @@ azurefile-csi-demo   file.csi.azure.com   Delete          Immediate           tr
 ### Dynamically create a Azure File using storage class we just created and mount to a pod
 First we create a PVC and a nginx pod to mount the PV.
 ```bash
-$kubectl apply -f disk/pod_nginx_demo.yaml
+$kubectl apply -f ./file/pod_nginx_file_demo.yaml
 
 --output--
 persistentvolumeclaim/pvc-azurefile-demo created
@@ -205,9 +205,9 @@ Thu Sep 15 16:12:10 UTC 2022
 
 To remove the resource
 ```bash
-kubectl delete -f file/pod_nginx_file_demo.yaml 
+kubectl delete -f ./file/pod_nginx_file_demo.yaml 
 # note this will only remove azure file share in storage account, but the storage account won't be delete, you may have to remove it manually.
-kubectl delete -f file/storage_class_file_demo.yaml
+kubectl delete -f ./file/storage_class_file_demo.yaml
 
 ```
 
