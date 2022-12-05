@@ -26,17 +26,21 @@ resource "azurerm_role_assignment" "this_vnet" {
 
 # create private DNS zone for AKS
 resource "azurerm_private_dns_zone" "this" {
+  count = var.enable_private_cluster ? 1 : 0
+
   name                = format("%s.privatelink.%s.azmk8s.io", var.dns_prefix, var.location)
   resource_group_name = var.rg_name
 }
 
 resource "azurerm_role_assignment" "this_dns_zone" {
-  scope                = azurerm_private_dns_zone.this.id
+  count = var.enable_private_cluster ? 1 : 0
+
+  scope                = azurerm_private_dns_zone.this[0].id
   role_definition_name = "Private DNS Zone Contributor"
   principal_id         = azurerm_user_assigned_identity.this.principal_id
 }
 
-# create route table for AKS
+# create route table for AKS kubenet provider
 resource "azurerm_route_table" "this" {
   name                          = format("route-%s", var.cluster_name)
   location                      = var.location
@@ -54,6 +58,7 @@ resource "azurerm_route_table" "this" {
 #   next_hop_type       = "VirtualAppliance"
 # }
 
+# create aks cluster
 resource "azurerm_kubernetes_cluster" "this" {
   location            = var.location
   name                = var.cluster_name
@@ -61,15 +66,16 @@ resource "azurerm_kubernetes_cluster" "this" {
   dns_prefix          = var.dns_prefix
   tags                = var.tags
   # enable private cluster
-  private_cluster_enabled = true
+  private_cluster_enabled = var.enable_private_cluster
 
-  # use the prirvate dns zone we created
-  private_dns_zone_id = azurerm_private_dns_zone.this.id
+  # use the prirvate dns zone when private cluster is enable
+  private_dns_zone_id = var.enable_private_cluster ? azurerm_private_dns_zone.this[0].id : null
+
 
   default_node_pool {
-    name          = "default"
-    type          = "VirtualMachineScaleSets"
-    vm_size       = var.default_agent_pool_vm_sku
+    name           = "default"
+    type           = "VirtualMachineScaleSets"
+    vm_size        = var.default_agent_pool_vm_sku
     vnet_subnet_id = var.default_agent_pool_subnet_id
 
 

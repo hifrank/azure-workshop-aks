@@ -36,3 +36,11 @@ output "kube_config" {
 output "resource_group_name" {
   value = var.rg_name
 }
+
+output "cluster_name" {
+  value = var.cluster_name
+}
+
+output "cluster_id" {
+  value = azurerm_kubernetes_cluster.this.id
+}

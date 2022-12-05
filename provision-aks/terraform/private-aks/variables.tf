@@ -1,8 +1,8 @@
-variable "rg_name" {
+variable "subscription_id" {
   type = string
 }
 
-variable "cluster_name" {
+variable "aks_rg_name" {
   type = string
 }
 
@@ -27,12 +27,15 @@ variable "default_agent_pool_min_count" {
 }
 
 variable "default_agent_pool_vm_sku" {
-  default = "Standard_D2_v2"
+  default = "Standard_D2_v5"
 }
 
+variable "cluster_name" {
+  type=string
+}
 
 variable "vnet_id" {
-  type = string
+  type=string
 }
 
 variable "dns_prefix" {
@@ -40,7 +43,7 @@ variable "dns_prefix" {
 }
 
 variable "network_policy" {
-  default = "calico"
+    default = "calico"
 }
 
 
@@ -49,12 +52,7 @@ variable "ssh_public_key" {
 }
 
 variable "tags" {
-  type    = map(any)
-  default = {}
-}
-
-variable "enable_private_cluster" {
-  type    = bool
-  default = true
+    type = map
+    default = {}
 }
 
